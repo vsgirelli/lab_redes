@@ -40,7 +40,6 @@ def log_thread(conn, addr):
             old_val = val_read
 
             writer.writerow(row)
-            sleep(1)
 
         # when message not received
         conn.close()
