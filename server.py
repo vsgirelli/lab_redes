@@ -25,6 +25,7 @@ def log_thread(conn, addr):
 
         val_read = 0
         old_val = 0
+        temp_i = 0
         while True:
             msg = conn.recv(size)
             if not msg:
@@ -32,14 +33,18 @@ def log_thread(conn, addr):
 
             val_read += sys.getsizeof(msg)
 
-            # prints the time, size of message read and the client port
-            row = [0,0,addr]
-            row[0] = int(time())
-            row[1] = val_read - old_val
+            temp_f = int(time())
+            if temp_f - temp_i >= 1:
+                # prints the time, size of message read and the client port
+                row = [0,0,addr]
+                row[0] = temp_f
+                row[1] = val_read - old_val
 
-            old_val = val_read
+                old_val = val_read
 
-            writer.writerow(row)
+                writer.writerow(row)
+
+                temp_i = temp_f
 
         # when message not received
         conn.close()
