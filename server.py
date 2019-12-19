@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import socket
 import thread
 import threading
@@ -12,7 +10,7 @@ if len(sys.argv) is not 2:
     exit()
 
 
-host = '127.0.0.1'  # localhost, that is, only clients on the host can connect to this server
+host = ''  # localhost, that is, only clients on the host can connect to this server
                     # if left empty, the server will accept connections from all available interfaces
 port = int(sys.argv[1]) # Port to listen on (non-privileged ports are > 1023)
 data = ['v']*64000
