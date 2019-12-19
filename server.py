@@ -16,21 +16,36 @@ port = int(sys.argv[1]) # Port to listen on (non-privileged ports are > 1023)
 data = ['v']*64000
 size = sys.getsizeof(' '.join(data))
 
-val_read = 0
 
-def log_thread():
-    filename = 'log_' + str(port) + '.csv'
+def log_thread(conn, addr):
+    # creates log file for this connection
+    filename = 'log_' + str(addr) + '.csv'
     with open(filename,'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
+
+        val_read = 0
         old_val = 0
         while True:
-            val = val_read
-            row = [0,0]
+            msg = conn.recv(size)
+            if not msg:
+                break
+
+            val_read += sys.getsizeof(msg)
+
+            # prints the time, size of message read and the client port
+            row = [0,0,addr]
             row[0] = int(time())
-            row[1] = val - old_val
-            old_val = val
+            row[1] = val_read - old_val
+
+            old_val = val_read
+
             writer.writerow(row)
             sleep(1)
+
+        # when message not received
+        conn.close()
+
+
 
 
 # AF_INET is IPv4, and a SOCK_STREAM specify that the socket is TCP
@@ -40,17 +55,10 @@ s.bind((host, port)) # used to associate the socket with a specific interface an
 print('Listening...')
 s.listen(1)
 
-thread.start_new_thread(log_thread, ())
-
 while True:
     conn, addr = s.accept() # returns a new socket object
     # conn is a socket object different from the s socket above
     # for each accepted connection, a new socket is created
     print('Connected by', addr[1])
-
-    while True:
-        rcv = conn.recv(size)
-        if not rcv:
-            break
-        val_read += sys.getsizeof(rcv)
+    thread.start_new_thread(log_thread, (conn, addr[1]))
 
